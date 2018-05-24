@@ -155,13 +155,12 @@ namespace AnalyticCheckCrawler
                 Console.WriteLine("Page had no content {0}", crawledPage.Uri.AbsoluteUri);
 
             var htmlDocument = crawledPage.HtmlDocument;
-            var UserTable = htmlDocument.DocumentNode.SelectNodes("//script[contains(., 'www.google-analytics.com/analytics.js')]");
+            var analyticCode = htmlDocument.DocumentNode.SelectNodes("//script[contains(., 'www.google-analytics.com/analytics.js')]");
 
-            if (UserTable != null)
+            if (analyticCode != null)
             {
                 _logger.Info("Analytic code exist");
             }
-
         }
 
         static void crawler_PageLinksCrawlDisallowed(object sender, PageLinksCrawlDisallowedArgs e)
