@@ -156,7 +156,7 @@ namespace AnalyticCheckCrawler
 
             var htmlDocument = crawledPage.HtmlDocument;
             var UserTable = htmlDocument.DocumentNode.SelectNodes("//script[contains(., 'www.google-analytics.com/analytics.js')]");
-            
+
             if (UserTable != null)
             {
                 _logger.Info("Analytic code exist");
@@ -173,6 +173,6 @@ namespace AnalyticCheckCrawler
         {
             //Process data
         }
+
     }
-}
 }
