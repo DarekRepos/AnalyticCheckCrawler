@@ -1,8 +1,10 @@
 ﻿using Abot.Crawler;
 using Abot.Poco;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,10 +12,12 @@ namespace AnalyticCheckCrawler
 {
     class Program
     {
+        private static readonly ILog _logger = LogManager.GetLogger("AbotLogger");
+
         static void Main(string[] args)
         {
             log4net.Config.XmlConfigurator.Configure();
-            
+
             Uri uriToCrawl = GetSiteToCrawl(args);
 
             IWebCrawler crawler;
@@ -33,7 +37,7 @@ namespace AnalyticCheckCrawler
             //Start the crawl
             //This is a synchronous call
             CrawlResult result = crawler.Crawl(uriToCrawl);
-                       
+
         }
 
         private static IWebCrawler GetDefaultWebCrawler()
@@ -52,9 +56,9 @@ namespace AnalyticCheckCrawler
             config.IsRespectRobotsDotTextEnabled = false;
             config.IsUriRecrawlingEnabled = false;
             config.MaxConcurrentThreads = 10;
-            config.MaxPagesToCrawl = 10;
+            config.MaxPagesToCrawl = 100;
             config.MaxPagesToCrawlPerDomain = 0;
-            config.MinCrawlDelayPerDomainMilliSeconds = 1000;
+            config.MinCrawlDelayPerDomainMilliSeconds = 2000;
 
             //Add you own values without modifying Abot's source code.
             //These are accessible in CrawlContext.CrawlConfuration.ConfigurationException object throughout the crawl
@@ -140,7 +144,24 @@ namespace AnalyticCheckCrawler
 
         static void crawler_ProcessPageCrawlCompleted(object sender, PageCrawlCompletedArgs e)
         {
-            //Process data
+            CrawledPage crawledPage = e.CrawledPage;
+
+            if (crawledPage.WebException != null || crawledPage.HttpWebResponse.StatusCode != HttpStatusCode.OK)
+                Console.WriteLine("Crawl of page failed {0}", crawledPage.Uri.AbsoluteUri);
+            else
+                Console.WriteLine("Crawl of page succeeded {0}", crawledPage.Uri.AbsoluteUri);
+
+            if (string.IsNullOrEmpty(crawledPage.Content.Text))
+                Console.WriteLine("Page had no content {0}", crawledPage.Uri.AbsoluteUri);
+
+            var htmlDocument = crawledPage.HtmlDocument;
+            var UserTable = htmlDocument.DocumentNode.SelectNodes("//script[contains(., 'www.google-analytics.com/analytics.js')]");
+            
+            if (UserTable != null)
+            {
+                _logger.Info("Analytic code exist");
+            }
+
         }
 
         static void crawler_PageLinksCrawlDisallowed(object sender, PageLinksCrawlDisallowedArgs e)
