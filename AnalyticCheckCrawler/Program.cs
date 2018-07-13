@@ -56,9 +56,9 @@ namespace AnalyticCheckCrawler
             config.IsRespectRobotsDotTextEnabled = false;
             config.IsUriRecrawlingEnabled = false;
             config.MaxConcurrentThreads = 10;
-            config.MaxPagesToCrawl = 100;
+            config.MaxPagesToCrawl = 5000;
             config.MaxPagesToCrawlPerDomain = 0;
-            config.MinCrawlDelayPerDomainMilliSeconds = 2000;
+            config.MinCrawlDelayPerDomainMilliSeconds = 3000;
 
             //Add you own values without modifying Abot's source code.
             //These are accessible in CrawlContext.CrawlConfuration.ConfigurationException object throughout the crawl
@@ -155,11 +155,15 @@ namespace AnalyticCheckCrawler
                 Console.WriteLine("Page had no content {0}", crawledPage.Uri.AbsoluteUri);
 
             var htmlDocument = crawledPage.HtmlDocument;
-            var analyticCode = htmlDocument.DocumentNode.SelectNodes("//script[contains(., 'www.google-analytics.com/analytics.js')]");
+            var analyticCode = htmlDocument.DocumentNode.SelectNodes("//script[contains(., 'Google Analytics')]");
 
             if (analyticCode != null)
             {
-                _logger.Info("Analytic code exist");
+                _logger.Info("OK Analytic code exist");
+            }
+            else
+            {
+                _logger.Info("Failed code ");
             }
         }
 
